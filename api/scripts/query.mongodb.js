@@ -31,6 +31,7 @@ db.articulos.insertMany([
         laboratorio: "Genfar S.A.",
         saldo: 150,
         costo_unidad: 3500.00,
+        precio_venta: 3500.00
     },
     {
         codigo: "IBP200",
@@ -38,6 +39,7 @@ db.articulos.insertMany([
         laboratorio: "Bayer S.A.",
         saldo: 80,
         costo_unidad: 12500.00,
+        precio_venta: 12500.00
     },
     {
         codigo: "OMZ20",
@@ -45,6 +47,7 @@ db.articulos.insertMany([
         laboratorio: "Tecnoquímicas",
         saldo: 45,
         costo_unidad: 9800.00,
+        precio_venta: 9800.00
     },
     {
         codigo: "LOR10",
@@ -52,6 +55,7 @@ db.articulos.insertMany([
         laboratorio: "Procaps S.A.",
         saldo: 60,
         costo_unidad: 7500.00,
+        precio_venta: 7500.00
     }
 ]);
 
