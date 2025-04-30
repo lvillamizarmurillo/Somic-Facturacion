@@ -3,7 +3,7 @@ import Cliente from "../services/clientes.js";
 
 const routerCliente = Router();
 
-routerCliente.get('/', Cliente.getHolaMundo);
+routerCliente.get('/', Cliente.getClientes);
 
 export{
     routerCliente
