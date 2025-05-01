@@ -74,6 +74,7 @@ db.factura.insertMany([
         fecha: new Date("2025-04-18"),
         fecha_vencimiento: new Date("2025-06-17"),
         nit_cliente: "123",
+        total_Venta: 0.00,
         total_Costo: 9800.00,
         estado: "pagado"
     },
@@ -83,6 +84,7 @@ db.factura.insertMany([
         fecha_vencimiento: new Date("2025-06-17"),
         nit_cliente: "321",
         total_Venta: 55000.00,
+        total_Costo: 0.00,
         estado: "pagado"
     },
     {
@@ -105,6 +107,7 @@ db.facturakardex.insertMany([
         unidades: 10,
         precio_venta_unitario: 5250.00,
         subtotal_venta: 52500.00,
+        subtotal_costo: 0.00
     },
     {
         numero_factura: "FE2025-001",
@@ -113,7 +116,8 @@ db.facturakardex.insertMany([
         naturaleza: "positiva (+)",
         unidades: 7,
         costo_unitario: 10000.00,
-        subtotal_costo: 70000.00,
+        subtotal_venta: 0.00,
+        subtotal_costo: 70000.00
     },
     {
         numero_factura: "FE2025-002",
@@ -122,7 +126,8 @@ db.facturakardex.insertMany([
         naturaleza: "positiva (+)",
         unidades: 1,
         costo_unitario: 9800.00,
-        subtotal_costo: 9800.00,
+        subtotal_venta: 0.00,
+        subtotal_costo: 9800.00
     },
     {
         numero_factura: "FE2025-003",
@@ -132,6 +137,7 @@ db.facturakardex.insertMany([
         unidades: 10,
         precio_venta_unitario: 5500.00,
         subtotal_venta: 55000.00,
+        subtotal_costo: 0.00
     },
     {
         numero_factura: "FE2025-004",
@@ -140,7 +146,8 @@ db.facturakardex.insertMany([
         naturaleza: "positiva (+)",
         unidades: 10,
         costo_unitario: 9800.00,
-        subtotal_costo: 98000.00,
+        subtotal_venta: 0.00,
+        subtotal_costo: 98000.00
     },
     {
         numero_factura: "FE2025-004",
@@ -150,5 +157,6 @@ db.facturakardex.insertMany([
         unidades: 2,
         precio_venta_unitario: 7500.00,
         subtotal_venta: 15000.00,
+        subtotal_costo: 98000.00
     }
 ]);
