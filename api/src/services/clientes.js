@@ -1,4 +1,5 @@
 import db from '../config/connectMongo.js';
+import { calcularFechaVencimiento } from '../helpers/facturaHelpers.js';
 
 const clientes = db.getInstancia().elegirColeccion('clientes').conectar();
 

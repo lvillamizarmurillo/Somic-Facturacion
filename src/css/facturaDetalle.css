@@ -176,7 +176,7 @@ body{
 /* Celdas del cuerpo */
 .tabla-articulos td {
     padding: 12px;
-    background-color: #d4d4d4;
+    background-color: #e7e6e6;
     border: solid 1px rgb(0, 0, 0);
     color: #000000;
     vertical-align: middle;

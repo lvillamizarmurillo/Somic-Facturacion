@@ -1,6 +1,95 @@
 import "../../css/facturaDetalle.css"
+import React, { useState, useEffect } from "react";
+
+const env = {
+    VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
+    PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
+}
 
 function FacturaDetalle(){
+    
+    const [data, setData] = useState(null);
+    const [dataCliente, setDataCliente] = useState(null);
+    const [numeroAleatorio, setNumeroAleatorio] = useState('');
+    const [fechaActual, setFechaActual] = useState('');
+    const [fechaVencimiento, setFechaVencimiento] = useState('');
+    const [naturaleza, setNaturaleza] = useState('Positiva(+)');
+
+    const fetchDataClienteNit = async (id) => {
+        try {
+          const response = await(await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/cliente/${id}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          })).json();
+          if(response.status == 200){
+            obtenerFechaVencimiento(new Date(), response.message[0].plazo_dias || 0)
+            setDataCliente(response.message);
+            
+          }else{
+            console.log(response.message)
+          }
+        } catch (error) {
+          console.error(error);
+        }
+    }
+    
+    const handleNaturalezaChange = (e) => {
+        setNaturaleza(e.target.value);
+    };
+
+    const handleCliente = async(e) => {
+        fetchDataClienteNit(e.target.value);
+        
+    }
+
+    const obtenerFechaVencimiento = (fecha, plazoDias) => {
+        const hoy = new Date(fecha.getTime() + plazoDias * 24 * 60 * 60 * 1000);
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0'); 
+        const año = hoy.getFullYear();
+        setFechaVencimiento(`${dia}-${mes}-${año}`);
+    };
+
+    useEffect(() => {
+        const generarNumero = () => {
+            const min = 1000000000;
+            const max = 9999999999;
+            const num = Math.floor(Math.random() * (max - min + 1)) + min;
+            setNumeroAleatorio(num.toString());
+        };
+        const obtenerFechaActual = () => {
+            const hoy = new Date();
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0'); 
+            const año = hoy.getFullYear();
+            setFechaActual(`${dia}-${mes}-${año}`);
+        };
+        const fetchDataClientes = async () => {
+            try {
+              const response = await(await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/cliente`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              })).json();
+              if(response.status == 200){
+                setData(response.message);
+                
+              }else{
+                console.log(response.message)
+              }
+            } catch (error) {
+              console.error(error);
+            }
+        }
+
+        generarNumero();
+        obtenerFechaActual();
+        fetchDataClientes();
+    }, []);
+
     return(
         <>
             <div className="container">
@@ -10,7 +99,7 @@ function FacturaDetalle(){
                 <div className="datos-factura">
                     <div className="primera-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">FE2065221484</p>
+                            <p placeholder="NAME" type="text" name="text" class="custom-input">{`FE${numeroAleatorio}`}</p>
                         </div>
                         <div className="texto-input">
                             <p>Número de factura</p>
@@ -18,7 +107,7 @@ function FacturaDetalle(){
                     </div>
                     <div className="primera-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">03-05-2025</p>                        
+                            <p placeholder="NAME" type="text" name="text" class="custom-input">{fechaActual}</p>                        
                         </div>
                         <div className="texto-input">
                             <p>Fecha de emisión</p>
@@ -26,7 +115,7 @@ function FacturaDetalle(){
                     </div>
                     <div className="primera-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">21-06-2025</p>
+                            <p placeholder="NAME" type="text" name="text" class="custom-input">{fechaVencimiento}</p>
                         </div>
                         <div className="texto-input">
                             <p>Fecha de vencimiento</p>
@@ -36,11 +125,14 @@ function FacturaDetalle(){
                 <div className="container-primer-buscador">
                     <div className="segunda-informacion-nit">
                         <div className="input">
-                            <select className="custom-select">
+                            <select className="custom-select" onChange={handleCliente}>
                                 <option value="" disabled selected>Seleccione una opción</option>
-                                <option value="1">123</option>
-                                <option value="2">987</option>
-                                <option value="3">432</option>
+                                {data != null &&(
+                                    data.map((item,index)=>(
+                                        <option value={item.documento}>{item.documento}</option>
+                                    ))
+                                    
+                                )}
                             </select>
                         </div>
                         <div className="texto-input">
@@ -49,7 +141,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="segunda-informacion-nombre">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">Mediclinicos</p>
+                            {dataCliente != null ? (
+                                dataCliente.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{item.nombre}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Nombre</p>
@@ -57,7 +155,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="segunda-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">$ 120.000</p>
+                            {dataCliente != null ? (
+                                dataCliente.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{`$ ${item.cupo}`}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Cupo</p>
@@ -65,7 +169,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="segunda-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">30 días</p>
+                            {dataCliente != null ? (
+                                dataCliente.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{`${item.plazo_dias} días`}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Plazo</p>
@@ -73,7 +183,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="segunda-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">$ 40.000</p>
+                            {dataCliente != null ? (
+                                dataCliente.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{`$ ${item.cartera}`}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Cartera</p>
@@ -81,7 +197,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="segunda-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">$ 80.000</p>
+                            {dataCliente != null ? (
+                                dataCliente.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{`$ ${(item.cupo - item.cartera)}`}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Disponible</p>
@@ -120,10 +242,10 @@ function FacturaDetalle(){
                     </div>
                     <div className="tercer-informacion">
                         <div className="input">
-                            <select className="custom-select">
-                                <option value="" disabled selected>Seleccione una opción</option>
-                                <option value="1">Positivaa (+)</option>
-                                <option value="2">Negativa (-)</option>
+                            <select className="custom-select" value={naturaleza} onChange={handleNaturalezaChange}>
+                                <option disabled selected>Seleccione una opción</option>
+                                <option value="Positiva (+)">Positiva (+)</option>
+                                <option value="Negativa (-)">Negativa (-)</option>
                             </select>
                         </div>
                         <div className="texto-input">
@@ -148,20 +270,26 @@ function FacturaDetalle(){
                     </div>
                     <div className="tercer-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">$ 4.500</p>
+                            {naturaleza === 'Positiva (+)' ? (
+                                <input placeholder="Introducir costo" type="number" name="costo" className="custom-input" />
+                            ) : (
+                                <p className="custom-input">$ 4.500</p>
+                            )}
                         </div>
                         <div className="texto-input">
                             <p>Costo unidad</p>
                         </div>
                     </div>
-                    <div className="tercer-informacion">
-                        <div className="input">
-                            <input placeholder="Introducir precio" type="number" name="text" class="custom-input-texto" />
+                    {naturaleza === 'Negativa (-)' && (
+                        <div className="tercer-informacion">
+                            <div className="input">
+                                <input placeholder="Introducir precio" type="number" name="text" class="custom-input-texto" />
+                            </div>
+                            <div className="texto-input">
+                                <p>Precio de venta</p>
+                            </div>
                         </div>
-                        <div className="texto-input">
-                            <p>Precio de venta</p>
-                        </div>
-                    </div>
+                    )}
                 </div>
                 <div className="container-boton">
                     <button className="btn-agrgar">
