@@ -10,6 +10,10 @@ function FacturaDetalle(){
     
     const [data, setData] = useState(null);
     const [dataCliente, setDataCliente] = useState(null);
+    const [dataArticulo, setDataArticulo] = useState(null);
+    const [dataArticulos, setDataArticulos] = useState(null);
+    const [costoUnidad, setCostoUnidad] = useState(0);
+    const [precioVenta, setPrecioVenta] = useState(0);
     const [numeroAleatorio, setNumeroAleatorio] = useState('');
     const [fechaActual, setFechaActual] = useState('');
     const [fechaVencimiento, setFechaVencimiento] = useState('');
@@ -34,6 +38,37 @@ function FacturaDetalle(){
           console.error(error);
         }
     }
+
+    const fetchDataArticulo = async (id) => {
+        try {
+          const response = await(await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/articulos/${id}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+          })).json();
+          if(response.status == 200){
+            console.log(response.message);
+            
+            setDataArticulo(response.message);
+            
+          }else{
+            console.log(response.message)
+          }
+        } catch (error) {
+          console.error(error);
+        }
+    }
+
+    const handleCostoChange = (e) => {
+        setCostoUnidad(parseFloat(e.target.value));
+    };
+
+    const handlePrecioVentaChange = (e) => {
+        const nuevoPrecio = parseFloat(e.target.value);
+        setPrecioVenta(nuevoPrecio || 0); 
+    };
+
     
     const handleNaturalezaChange = (e) => {
         setNaturaleza(e.target.value);
@@ -41,7 +76,9 @@ function FacturaDetalle(){
 
     const handleCliente = async(e) => {
         fetchDataClienteNit(e.target.value);
-        
+    }
+    const handleArticulo = async(e) => {
+        fetchDataArticulo(e.target.value);
     }
 
     const obtenerFechaVencimiento = (fecha, plazoDias) => {
@@ -85,10 +122,36 @@ function FacturaDetalle(){
             }
         }
 
+        const fetchDataarticulos = async () => {
+            try {
+              const response = await(await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/articulos`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              })).json();
+              if(response.status == 200){
+                setDataArticulos(response.message);
+                
+              }else{
+                console.log(response.message)
+              }
+            } catch (error) {
+              console.error(error);
+            }
+        }
+
+        if (dataArticulo && dataArticulo.length > 0) {
+            const costo = dataArticulo[0].costo_unidad;
+            setCostoUnidad(costo);
+            setPrecioVenta(costo); 
+        }
+
         generarNumero();
         obtenerFechaActual();
         fetchDataClientes();
-    }, []);
+        fetchDataarticulos();
+    }, [dataArticulo]);
 
     return(
         <>
@@ -213,11 +276,14 @@ function FacturaDetalle(){
                 <div className="container-segundo-buscador">
                     <div className="tercer-informacion-articulo">
                         <div className="input">
-                            <select className="custom-select">
+                            <select className="custom-select" onChange={handleArticulo}>
                                 <option value="" disabled selected>Seleccione una opción</option>
-                                <option value="1">123</option>
-                                <option value="2">987</option>
-                                <option value="3">432</option>
+                                {dataArticulos != null &&(
+                                    dataArticulos.map((item,index)=>(
+                                        <option value={item.codigo}>{item.codigo}</option>
+                                    ))
+                                    
+                                )}
                             </select>
                         </div>
                         <div className="texto-input">
@@ -226,7 +292,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="tercer-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">Acetamenofen</p>
+                            {dataArticulo != null ? (
+                                dataArticulo.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{item.nombre}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Nombre del artículo</p>
@@ -234,7 +306,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="tercer-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">Medicina General</p>
+                            {dataArticulo != null ? (
+                                dataArticulo.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{item.laboratorio}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Laboratorio</p>
@@ -254,7 +332,13 @@ function FacturaDetalle(){
                     </div>
                     <div className="tercer-informacion">
                         <div className="input">
-                            <p placeholder="NAME" type="text" name="text" class="custom-input">150</p>
+                            {dataArticulo != null ? (
+                                dataArticulo.map((item,index)=>(
+                                    <p placeholder="NAME" type="text" name="text" class="custom-input">{`${item.saldo} unidades`}</p>
+                                ))
+                            ) : (
+                                <p placeholder="NAME" type="text" name="text" class="custom-input"></p>
+                            )};
                         </div>
                         <div className="texto-input">
                             <p>Saldo</p>
@@ -269,21 +353,42 @@ function FacturaDetalle(){
                         </div>
                     </div>
                     <div className="tercer-informacion">
-                        <div className="input">
-                            {naturaleza === 'Positiva (+)' ? (
-                                <input placeholder="Introducir costo" type="number" name="costo" className="custom-input" />
-                            ) : (
-                                <p className="custom-input">$ 4.500</p>
-                            )}
+                    <div className="input">
+                        {naturaleza === 'Positiva (+)' ? (
+                            <input 
+                                placeholder="Introducir costo" 
+                                type="number" 
+                                name="costo" 
+                                className="custom-input-texto" 
+                                value={costoUnidad}
+                                onChange={handleCostoChange}
+                                step="0.01"
+                                min="0"
+                            />
+                        ) : (
+                            <p className="custom-input">
+                                {dataArticulo && dataArticulo.length > 0 ? `$ ${dataArticulo[0].costo_unidad.toFixed(2)}` : '$ 0.00'}
+                            </p>
+                        )}
                         </div>
                         <div className="texto-input">
                             <p>Costo unidad</p>
                         </div>
                     </div>
+
                     {naturaleza === 'Negativa (-)' && (
                         <div className="tercer-informacion">
                             <div className="input">
-                                <input placeholder="Introducir precio" type="number" name="text" class="custom-input-texto" />
+                                <input 
+                                    placeholder="Introducir precio" 
+                                    type="number" 
+                                    name="precio" 
+                                    className="custom-input-texto"
+                                    value={precioVenta}
+                                    onChange={handlePrecioVentaChange}
+                                    step="0.01"
+                                    min="0"  // Permite cualquier valor positivo (incluyendo 0)
+                                />
                             </div>
                             <div className="texto-input">
                                 <p>Precio de venta</p>
