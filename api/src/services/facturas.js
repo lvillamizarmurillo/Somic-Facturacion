@@ -138,7 +138,7 @@ export default class Facturas {
             // Actualización de cliente
             await clientes.updateOne(
             { documento: factura.nit_cliente },
-            { $set: { cartera: cartera + factura.total_Venta } }
+            { $set: { cartera: cartera } }
             );
         
             // Guardado en base de datos
