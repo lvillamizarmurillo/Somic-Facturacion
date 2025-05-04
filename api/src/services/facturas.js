@@ -67,6 +67,27 @@ export default class Facturas {
                         foreignField: "numero_factura",
                         as: "articulos"
                     }
+                },
+                {
+                    $lookup: {
+                        from: "clientes",  
+                        localField: "nit_cliente",  
+                        foreignField: "documento", 
+                        as: "cliente_info" 
+                    }
+                },
+                {
+                    $unwind: "$cliente_info" 
+                },
+                {
+                    $addFields: {
+                        "nombre_empresa": "$cliente_info.nombre"  
+                    }
+                },
+                {
+                    $project: {
+                        "cliente_info": 0  
+                    }
                 }
             ]).toArray();
 
