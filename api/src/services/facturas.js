@@ -50,53 +50,36 @@ export default class Facturas {
         }
     }
 
-    static async getFacturasKardexNit(req,res,next){
+    static async getFacturaCompleta(req,res,next){
         try {
-            const result = await facturakardex.aggregate([
-                {
-                    $match: {numero_factura: req.params.idFactura}
-                }
-            ]).toArray();
-            res.locals.result = result;
-            next();
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    static async getFacturasKardexNitPositiva(req,res,next){
-        try {
-            const result = await facturakardex.aggregate([
+            const numeroFactura = req.params.factura;
+            
+            const result = await facturas.aggregate([
                 {
                     $match: {
-                        numero_factura: req.params.idFactura,
-                        naturaleza: "positiva (+)"
+                        "numero": numeroFactura
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "facturakardex",
+                        localField: "numero",
+                        foreignField: "numero_factura",
+                        as: "articulos"
                     }
                 }
             ]).toArray();
-            res.locals.result = result;
-            next();
-        } catch (error) {
-            next(error)
-        }
-    }
 
-    static async getFacturasKardexNitNegativa(req,res,next){
-        try {
-            const result = await facturakardex.aggregate([
-                {
-                    $match: {
-                        numero_factura: req.params.idFactura,
-                        naturaleza: "negativa (-)"
-                    }
-                }
-            ]).toArray();
-            res.locals.result = result;
-            next();
+            if (result.length === 0) {
+                return res.status(404).json({status: 404, message: "No se encontró ningún dato en la búsqueda"})
+            } else {
+                return res.status(200).json({status: 200, message: result});
+            }
+
         } catch (error) {
-            next(error)
+            return res.status(200).json({status: 200, message: error})
         }
-    }
+    }    
 
     static async postFactura(req, res) {
         try {

@@ -1,6 +1,9 @@
 export const validationGet = ()=>{
     return async (req,res)=>{
-        const data = res.locals.result
+        
+        const data = res.locals.result;
+        console.log(JSON.stringify(res.locals.result));
+        
         if (data.length === 0){
             return res.status(404).json({status: 404, message: "No se encontró ningún dato en la búsqueda"})
         }else{
