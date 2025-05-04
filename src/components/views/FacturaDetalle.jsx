@@ -41,7 +41,7 @@ function FacturaDetalle() {
   };
 
   const fetchDataClienteNit = async (id) => {
-    const response = await fetchData(`/cliente/${id}`);
+    const response = await fetchData(`/factura/${id}`);
     if(response){
       obtenerFechaVencimiento(new Date(), response[0].plazo_dias || 0);
       setDataCliente(response);
