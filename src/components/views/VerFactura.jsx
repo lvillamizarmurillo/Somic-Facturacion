@@ -82,7 +82,7 @@ function VerFactura() {
           </div>
           <div className="segunda-informacion-nombre">
             <div className="input">
-              <p className="custom-input">{facturaData?.nombre_cliente || ''}</p>
+              <p className="custom-input">{facturaData?.nombre_empresa || ''}</p>
             </div>
             <div className="texto-input"><p>Nombre</p></div>
           </div>

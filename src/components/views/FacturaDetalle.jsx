@@ -1,6 +1,8 @@
 import "../../css/facturaDetalle.css";
 import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+
 
 const env = {
   VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
@@ -8,6 +10,9 @@ const env = {
 };
 
 function FacturaDetalle() {
+  const [facturas, setFacturas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [cookies, setCookie, removeCookie] = useCookies(['facturas']);
   const [data, setData] = useState(null);
   const [dataCliente, setDataCliente] = useState(null);
@@ -41,7 +46,7 @@ function FacturaDetalle() {
   };
 
   const fetchDataClienteNit = async (id) => {
-    const response = await fetchData(`/factura/${id}`);
+    const response = await fetchData(`/cliente/${id}`);
     if(response){
       obtenerFechaVencimiento(new Date(), response[0].plazo_dias || 0);
       setDataCliente(response);
@@ -68,6 +73,31 @@ function FacturaDetalle() {
       console.error("Error:", error);
       throw error;
     }
+  };
+
+  const fetchFacturasCliente = async (id) => {
+    setLoading(true);
+    try {
+      const response = await fetchData(`/facturas/${id}`);
+      
+      if (response && response.length != 0) {  // Cambié esta condición
+
+        console.log(response);
+        setFacturas(response);
+      } else {
+        console.log("No se encontraron facturas o hubo un error");
+        setFacturas([]);  // Limpiar facturas si no hay resultados
+      }
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setFacturas([]);  // Limpiar facturas en caso de error
+    } finally {
+      setLoading(false);
+    }
+  };  
+
+  const handleVerFactura = (numeroFactura) => {
+    navigate(`/factura/${numeroFactura}`);
   };
 
   const handleClienteChange = async (e) => {
@@ -553,6 +583,94 @@ function FacturaDetalle() {
           <button className="btn-agrgar" onClick={handleGuardarFactura}>
             <span className="button_top">Guardar</span>
           </button>
+        </div>
+        
+        {/* Sección de facturas del cliente */}
+        <div style={{ marginTop: '30px', width: '100%' }}>
+          <div className="container-boton" style={{ marginBottom: '20px' }}>
+            <button 
+              className="btn-agrgar" 
+              onClick={() => fetchFacturasCliente(selectedCliente)}
+              disabled={!selectedCliente}
+              style={{ opacity: !selectedCliente ? 0.5 : 1 }}
+            >
+              <span className="button_top">Ver Facturas</span>
+            </button>
+          </div>
+
+          {loading && <p style={{ textAlign: 'center', color: '#666' }}>Cargando facturas...</p>}
+          
+          {facturas.length > 0 ? (
+            <div className="container-tabla-articulos">
+              <div className="tabla-articulos">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Número</th>
+                      <th>Fecha Emisión</th>
+                      <th>Fecha Vencimiento</th>
+                      <th>Estado</th>
+                      <th>Total Venta</th>
+                      <th>Total Costo</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {facturas.map((factura) => (
+                      <tr key={factura._id}>
+                        <td>{factura.numero}</td>
+                        <td>{new Date(factura.fecha).toLocaleDateString('es-ES')}</td>
+                        <td>{new Date(factura.fecha_vencimiento).toLocaleDateString('es-ES')}</td>
+                        <td style={{ 
+                          color: factura.estado === 'pendiente' ? '#e20808' : '#17a01e',
+                          fontWeight: 'bold',
+                          textTransform: 'capitalize'
+                        }}>
+                          {factura.estado}
+                        </td>
+                        <td style={{ color: '#17a01e', fontWeight: 'bold' }}>
+                          ${factura.total_Venta.toLocaleString('es-ES')}
+                        </td>
+                        <td style={{ color: '#e20808', fontWeight: 'bold' }}>
+                          ${factura.total_Costo.toLocaleString('es-ES')}
+                        </td>
+                        <td>
+                          <button 
+                            onClick={() => handleVerFactura(factura.numero)}
+                            style={{
+                              background: 'linear-gradient(to bottom, #525252, #1f1f1f)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.background = 'linear-gradient(to bottom, #5a7cc8, #293a5a)';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.background = 'linear-gradient(to bottom, #525252, #1f1f1f)';
+                              e.target.style.transform = 'none';
+                            }}
+                          >
+                            Ver Ahora
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            !loading && selectedCliente && (
+              <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
+                No se encontraron facturas para este cliente
+              </p>
+            )
+          )}
         </div>
       </div>
     </>

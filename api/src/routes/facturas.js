@@ -6,8 +6,6 @@ const routerFacturas = Router();
 
 routerFacturas.get('/', Facturas.getFacturas, validationGet())
 
-routerFacturas.get('/kardex', Facturas.getFacturasKardex, validationGet())
-
 routerFacturas.get('/:id', Facturas.getFacturasNit, validationGet())
 
 routerFacturas.get('/completa/:factura', Facturas.getFacturaCompleta)
