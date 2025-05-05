@@ -32,7 +32,7 @@ function FacturaDetalle() {
 
   const fetchData = async (url) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
@@ -60,7 +60,7 @@ function FacturaDetalle() {
 
   const postFacturas = async (facturaData) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/facturas`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/facturas`, {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(facturaData)

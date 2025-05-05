@@ -15,7 +15,7 @@ function VerFactura() {
 
   const fetchData = async (url) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });

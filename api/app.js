@@ -8,7 +8,7 @@ import { routerFacturas } from './src/routes/facturas.js';
 const env = loadEnv('development', process.cwd(), 'VITE');
 const app = express()
 const corsOptions = {
-    origin: "*", // Reemplaza con el dominio de tu aplicación frontend
+    origin: "*",
 };
 const config = {
     hostname: env.VITE_HOSTNAME,
@@ -27,5 +27,5 @@ app
     .use('/facturas', routerFacturas)
 
     .listen(config, ()=>{
-        console.log(`http://${config.hostname}:${config.port}`);
+        console.log(`https://${config.hostname}:${config.port}`);
     })
