@@ -1,4 +1,5 @@
 import db from '../config/connectMongo.js';
+import ValidationsCliente from '../controller/storageCliente.js';
 import { calcularFechaVencimiento } from '../helpers/facturaHelpers.js';
 
 const clientes = db.getInstancia().elegirColeccion('clientes').conectar();
@@ -39,6 +40,20 @@ export default class Cliente {
         }
         
         
+    }
+
+    static async postCliente(req,res){
+        try {            
+            const { error } = ValidationsCliente.validateCliente(req.body)
+
+            if (error) return res.status(400).send({ status: 400, message: error.details.map(err => err.message).join('. ') });
+
+            req.body.cartera = 0;
+            await clientes.insertOne(req.body);
+            return res.status(200).json({status: 200, message: "El cliente se guardó correctamente"})
+        } catch (error) {
+            return res.status(400).json({status: 400, message: error})
+        }
     }
     
 }

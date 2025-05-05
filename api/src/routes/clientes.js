@@ -8,6 +8,8 @@ routerCliente.get('/', Cliente.getClientes, validationGet());
 
 routerCliente.get('/:id', Cliente.getCliente, validationGet());
 
+routerCliente.post('/', Cliente.postCliente);
+
 export{
     routerCliente
 }
