@@ -27,5 +27,5 @@ app
     .use('/facturas', routerFacturas)
 
     .listen(config, ()=>{
-        console.log(`https://${config.hostname}:${config.port}`);
+        console.log(`http://${config.hostname}:${config.port}`);
     })

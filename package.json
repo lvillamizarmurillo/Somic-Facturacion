@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "nodemon --quiet api/app.js",
-    "iniciality": "serve dist -s -n"
+    "iniciality": "serve dist -s -n -L"
   },
   "dependencies": {
     "cors": "^2.8.5",

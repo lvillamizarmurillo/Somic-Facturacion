@@ -27,7 +27,7 @@ function RegistrarCliente() {
 
   const postCliente = async (clienteData) => {
     try {
-      const response = await fetch(`https://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/cliente`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}/cliente`, {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(clienteData)
