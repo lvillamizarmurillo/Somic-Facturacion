@@ -73,111 +73,113 @@ function RegistrarCliente() {
   };
 
   return (
-    <div className="client-register-container">
-      <div className="register-header">
-        <h3>REGISTRAR NUEVO CLIENTE</h3>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="client-form">
-        <div className="form-fields-group">
-          {/* Documento */}
-          <div className="form-field">
-            <div className="field-input">
-              <input
-                type="text"
-                name="documento"
-                value={formData.documento || ''}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="NIT o Documento"
-                required
-              />
-            </div>
-            <div className="field-label">
-              <span>Documento</span>
-            </div>
-          </div>
-          
-          {/* Nombre */}
-          <div className="form-field">
-            <div className="field-input">
-              <input
-                type="text"
-                name="nombre"
-                value={formData.nombre || ''}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Nombre del cliente"
-                required
-              />
-            </div>
-            <div className="field-label">
-              <span>Nombre</span>
-            </div>
-          </div>
-          
-          {/* Cupo */}
-          <div className="form-field">
-            <div className="field-input">
-              <input
-                type="number"
-                name="cupo"
-                value={formData.cupo || ''}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Cupo de crédito"
-                step="0.01"
-                min="0"
-                required
-              />
-            </div>
-            <div className="field-label">
-              <span>Cupo ($)</span>
-            </div>
-          </div>
-          
-          {/* Plazo en días */}
-          <div className="form-field">
-            <div className="field-input">
-              <input
-                type="number"
-                name="plazo_dias"
-                value={formData.plazo_dias || ''}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Plazo en días"
-                min="1"
-                required
-              />
-            </div>
-            <div className="field-label">
-              <span>Plazo (días)</span>
-            </div>
-          </div>
+    <div className="container">
+      <div className="client-register-container">
+        <div className="register-header">
+          <h3>REGISTRAR NUEVO CLIENTE</h3>
         </div>
         
-        {/* Botones */}
-        <div className="form-actions">
-          <button 
-            type="button" 
-            className="secondary-button"
-            onClick={() => navigate("/")}
-            disabled={loading}
-          >
-            <span className="button-content">Crear Factura</span>
-          </button>
+        <form onSubmit={handleSubmit} className="client-form">
+          <div className="form-fields-group">
+            {/* Documento */}
+            <div className="form-field">
+              <div className="field-input">
+                <input
+                  type="text"
+                  name="documento"
+                  value={formData.documento || ''}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="NIT o Documento"
+                  required
+                />
+              </div>
+              <div className="field-label">
+                <span>Documento</span>
+              </div>
+            </div>
+            
+            {/* Nombre */}
+            <div className="form-field">
+              <div className="field-input">
+                <input
+                  type="text"
+                  name="nombre"
+                  value={formData.nombre || ''}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Nombre del cliente"
+                  required
+                />
+              </div>
+              <div className="field-label">
+                <span>Nombre</span>
+              </div>
+            </div>
+            
+            {/* Cupo */}
+            <div className="form-field">
+              <div className="field-input">
+                <input
+                  type="number"
+                  name="cupo"
+                  value={formData.cupo || ''}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Cupo de crédito"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+              <div className="field-label">
+                <span>Cupo ($)</span>
+              </div>
+            </div>
+            
+            {/* Plazo en días */}
+            <div className="form-field">
+              <div className="field-input">
+                <input
+                  type="number"
+                  name="plazo_dias"
+                  value={formData.plazo_dias || ''}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Plazo en días"
+                  min="1"
+                  required
+                />
+              </div>
+              <div className="field-label">
+                <span>Plazo (días)</span>
+              </div>
+            </div>
+          </div>
           
-          <button 
-            type="submit" 
-            className="primary-button"
-            disabled={loading}
-          >
-            <span className="button-content">
-              {loading ? 'Guardando...' : 'Guardar Cliente'}
-            </span>
-          </button>
-        </div>
-      </form>
+          {/* Botones */}
+          <div className="form-actions">
+            <button 
+              type="button" 
+              className="secondary-button"
+              onClick={() => navigate("/")}
+              disabled={loading}
+            >
+              <span className="button-content">Crear Factura</span>
+            </button>
+            
+            <button 
+              type="submit" 
+              className="primary-button"
+              disabled={loading}
+            >
+              <span className="button-content">
+                {loading ? 'Guardando...' : 'Guardar Cliente'}
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

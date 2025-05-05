@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 
-
 const env = {
   VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
   PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
@@ -18,9 +17,9 @@ function FacturaDetalle() {
   const [dataCliente, setDataCliente] = useState(null);
   const [dataArticulo, setDataArticulo] = useState(null);
   const [dataArticulos, setDataArticulos] = useState(null);
-  const [costoUnidad, setCostoUnidad] = useState(0);
-  const [precioVenta, setPrecioVenta] = useState(0);
-  const [unidades, setUnidades] = useState(0);
+  const [costoUnidad, setCostoUnidad] = useState("");
+  const [precioVenta, setPrecioVenta] = useState("");
+  const [unidades, setUnidades] = useState("");
   const [selectedCliente, setSelectedCliente] = useState('');
   const [selectedArticulo, setSelectedArticulo] = useState('');
   const [numeroAleatorio, setNumeroAleatorio] = useState('');
@@ -28,6 +27,8 @@ function FacturaDetalle() {
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [naturaleza, setNaturaleza] = useState('Positiva (+)');
   const [articulosFactura, setArticulosFactura] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showError, setShowError] = useState(false);
 
   const fetchData = async (url) => {
     try {
@@ -37,10 +38,8 @@ function FacturaDetalle() {
       });
       const data = await response.json();
       if(data.status === 200) return data.message;
-      console.log(data.message);
       return null;
     } catch (error) {
-      console.error(error);
       return null;
     }
   };
@@ -66,11 +65,9 @@ function FacturaDetalle() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(facturaData)
       });
-  
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error:", error);
       throw error;
     }
   };
@@ -79,22 +76,17 @@ function FacturaDetalle() {
     setLoading(true);
     try {
       const response = await fetchData(`/facturas/${id}`);
-      
-      if (response && response.length != 0) {  // Cambié esta condición
-
-        console.log(response);
+      if (response && response.length != 0) {
         setFacturas(response);
       } else {
-        console.log("No se encontraron facturas o hubo un error");
-        setFacturas([]);  // Limpiar facturas si no hay resultados
+        setFacturas([]);
       }
     } catch (error) {
-      console.error("Error fetching invoices:", error);
-      setFacturas([]);  // Limpiar facturas en caso de error
+      setFacturas([]);
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const handleVerFactura = (numeroFactura) => {
     navigate(`/factura/${numeroFactura}`);
@@ -103,30 +95,25 @@ function FacturaDetalle() {
   const handleClienteChange = async (e) => {
     const nit = e.target.value;
     setSelectedCliente(nit);
-    
-    // Limpiar estado anterior
     setDataArticulo(null);
     setArticulosFactura([]);
     setSelectedArticulo('');
-    setUnidades(0);
-    setPrecioVenta(0);
-    setCostoUnidad(0);
-    
-    // Borrar cookies de facturas previas
+    setUnidades("");
+    setPrecioVenta("");
+    setCostoUnidad("");
+
     Object.keys(cookies).forEach(cookieName => {
       if (cookieName.startsWith('factura_')) {
         removeCookie(cookieName, { path: '/' });
       }
     });
-  
-    // Cargar nuevo cliente si se seleccionó uno
+
     if (nit) {
       await fetchDataClienteNit(nit);
     } else {
       setDataCliente(null);
     }
   };
-  
 
   const borrarCookiesFacturas = () => {
     Object.keys(cookies).forEach(cookieName => {
@@ -144,23 +131,22 @@ function FacturaDetalle() {
   const obtenerFechaVencimiento = (fecha, plazoDias) => {
     const hoy = new Date(fecha.getTime() + plazoDias * 24 * 60 * 60 * 1000);
     const dia = String(hoy.getDate()).padStart(2, '0');
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0'); 
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     setFechaVencimiento(`${dia}-${mes}-${hoy.getFullYear()}`);
   };
 
   const eliminarArticulo = (index) => {
     if (!dataCliente?.length) return;
-  
     const nitCliente = dataCliente[0].documento;
     const nuevosArticulos = [...articulosFactura];
     nuevosArticulos.splice(index, 1);
-    
+
     if (nuevosArticulos.length === 0) {
       removeCookie(`factura_${nitCliente}`, { path: '/' });
     } else {
       setCookie(`factura_${nitCliente}`, { articulos: nuevosArticulos }, { path: '/' });
     }
-    
+
     setArticulosFactura(nuevosArticulos);
   };
 
@@ -169,81 +155,97 @@ function FacturaDetalle() {
     setArticulosFactura(cookies[cookieName]?.articulos || []);
   };
 
+  const validateInput = (name, value) => {
+    const numValue = parseFloat(value);
+    if (isNaN(numValue) || numValue <= 0) {
+      displayError(`El valor de ${name} debe ser mayor a 0`);
+      return false;
+    }
+    return true;
+  };
+
+  const displayError = (message) => {
+    setErrorMessage(message);
+    setShowError(true);
+    setTimeout(() => {
+      setShowError(false);
+    }, 3000);
+  };
+
   const agregarArticulo = () => {
     if (!dataArticulo?.length || !dataCliente?.length) {
-      alert('Seleccione un cliente y un artículo');
+      displayError('Seleccione un cliente y un artículo');
       return;
     }
-  
-    if (unidades <= 0) {
-      alert('Las unidades deben ser mayores a 0');
+
+    if (!validateInput('unidades', unidades) ||
+        (naturaleza === 'Positiva (+)' && !validateInput('costo unitario', costoUnidad)) ||
+        (naturaleza === 'Negativa (-)' && !validateInput('precio de venta', precioVenta))) {
       return;
     }
-  
-    if (unidades > dataArticulo[0].saldo) {
-      alert(`No hay suficiente stock. Saldo disponible: ${dataArticulo[0].saldo}`);
+
+    if (parseInt(unidades) > dataArticulo[0].saldo) {
+      displayError(`No hay suficiente stock. Saldo disponible: ${dataArticulo[0].saldo}`);
       return;
     }
-  
-    if (naturaleza === 'Negativa (-)' && precioVenta < dataArticulo[0].costo_unidad) {
-      alert(`El precio de venta no puede ser menor al costo unitario ($${dataArticulo[0].costo_unidad.toFixed(2)})`);
+
+    if (naturaleza === 'Negativa (-)' && parseFloat(precioVenta) < dataArticulo[0].costo_unidad) {
+      displayError(`El precio de venta no puede ser menor al costo unitario ($${dataArticulo[0].costo_unidad.toFixed(2)})`);
       return;
     }
-  
+
     const nitCliente = dataCliente[0].documento;
     const nuevoArticulo = {
       codigo_articulo: dataArticulo[0].codigo,
       nombre_articulo: dataArticulo[0].nombre,
       naturaleza: naturaleza.toLowerCase(),
-      unidades: unidades,
-      precio_venta_unitario: naturaleza === 'Negativa (-)' ? precioVenta : 0,
-      costo_unitario: naturaleza === 'Positiva (+)' ? costoUnidad : 0,
+      unidades: parseInt(unidades),
+      precio_venta_unitario: naturaleza === 'Negativa (-)' ? parseFloat(precioVenta) : 0,
+      costo_unitario: naturaleza === 'Positiva (+)' ? parseFloat(costoUnidad) : 0,
       laboratorio: dataArticulo[0].laboratorio,
-      total: naturaleza === 'Negativa (-)' ? unidades * precioVenta : unidades * costoUnidad
+      total: naturaleza === 'Negativa (-)' ? parseInt(unidades) * parseFloat(precioVenta) : parseInt(unidades) * parseFloat(costoUnidad)
     };
-  
+
     const nuevosArticulos = [...articulosFactura, nuevoArticulo];
     setArticulosFactura(nuevosArticulos);
     setCookie(`factura_${nitCliente}`, { articulos: nuevosArticulos }, { path: '/' });
-  
+
     setDataArticulo(null);
-    setUnidades(0);
-    setPrecioVenta(0);
-    setCostoUnidad(0);
+    setUnidades("");
+    setPrecioVenta("");
+    setCostoUnidad("");
   };
 
   const validarDisponible = () => {
     if (!dataCliente?.length) return true;
-    
-    const totalNegativos = articulosFactura.reduce((total, articulo) => 
-      articulo.naturaleza.includes('negativa') ? 
-        total + (articulo.unidades * articulo.precio_venta_unitario) : 
-        total, 0);
-    
+    const totalNegativos = articulosFactura.reduce((total, articulo) =>
+      articulo.naturaleza.includes('negativa') ?
+      total + (articulo.unidades * articulo.precio_venta_unitario) :
+      total, 0);
     return totalNegativos <= (dataCliente[0].cupo - dataCliente[0].cartera);
   };
 
   const handleGuardarFactura = async () => {
     if (articulosFactura.length === 0) {
-      alert("Debe agregar al menos un artículo a la factura");
-      return;
-    }
-    
-    if (!dataCliente?.length) {
-      alert("Debe seleccionar un cliente");
-      return;
-    }
-    
-    const tieneNegativos = articulosFactura.some(art => art.naturaleza.includes('negativa'));
-    if (tieneNegativos && !validarDisponible()) {
-      alert("El total de artículos con naturaleza negativa excede el disponible del cliente");
+      displayError("Debe agregar al menos un artículo a la factura");
       return;
     }
   
-    const totalVentaNegativos = articulosFactura.reduce((sum, art) => 
-      art.naturaleza.includes('negativa') ? 
-        sum + (art.precio_venta_unitario * art.unidades) : 
-        sum, 0);
+    if (!dataCliente?.length) {
+      displayError("Debe seleccionar un cliente");
+      return;
+    }
+  
+    const tieneNegativos = articulosFactura.some(art => art.naturaleza.includes('negativa'));
+    if (tieneNegativos && !validarDisponible()) {
+      displayError("El total de artículos con naturaleza negativa excede el disponible del cliente");
+      return;
+    }
+  
+    const totalVentaNegativos = articulosFactura.reduce((sum, art) =>
+      art.naturaleza.includes('negativa') ?
+      sum + (art.precio_venta_unitario * art.unidades) :
+      sum, 0);
   
     const facturaData = {
       factura: {
@@ -262,46 +264,44 @@ function FacturaDetalle() {
       plazo_dias: dataCliente[0].plazo_dias,
       cartera: dataCliente[0].cartera + totalVentaNegativos
     };
-    
+  
     try {
       const result = await postFacturas(facturaData);
-      
-      console.log(result.status);
-      
+  
       if (result.status == 200) {
         borrarCookiesFacturas();
         setDataCliente(null);
         setDataArticulo(null);
-        setUnidades(0);
-        setPrecioVenta(0);
-        setCostoUnidad(0);
+        setUnidades("");
+        setPrecioVenta("");
+        setCostoUnidad("");
         setNaturaleza('Positiva (+)');
         setSelectedCliente('');
         setSelectedArticulo('');
-        if (window.confirm("Factura guardada exitosamente. ¿Desea limpiar el formulario?")) {
-          
-          const num = Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000;
-          setNumeroAleatorio(num.toString());
-          
-          const hoy = new Date();
-          const dia = String(hoy.getDate()).padStart(2, '0');
-          const mes = String(hoy.getMonth() + 1).padStart(2, '0'); 
-          setFechaActual(`${dia}-${mes}-${hoy.getFullYear()}`);
-          setFechaVencimiento('');
-        }
+        
+        const num = Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000;
+        setNumeroAleatorio(num.toString());
+        
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        setFechaActual(`${dia}-${mes}-${hoy.getFullYear()}`);
+        setFechaVencimiento('');
+        
+        displayError("Factura guardada exitosamente");
       } else {
-        alert(result.message || "Error al guardar la factura");
+        displayError(result.message || "Error al guardar la factura");
       }
     } catch (error) {
-      alert("Ocurrió un error al intentar guardar la factura");
+      displayError("Ocurrió un error al intentar guardar la factura");
     }
   };
 
   useEffect(() => {
     if (dataArticulo?.length > 0) {
       const costo = dataArticulo[0].costo_unidad;
-      setCostoUnidad(costo);
-      setPrecioVenta(costo);
+      setCostoUnidad(costo.toString());
+      setPrecioVenta(costo.toString());
     }
   }, [dataArticulo]);
 
@@ -316,14 +316,14 @@ function FacturaDetalle() {
       const num = Math.floor(Math.random() * (9999999999 - 1000000000 + 1)) + 1000000000;
       setNumeroAleatorio(num.toString());
     };
-    
+
     const obtenerFechaActual = () => {
       const hoy = new Date();
       const dia = String(hoy.getDate()).padStart(2, '0');
-      const mes = String(hoy.getMonth() + 1).padStart(2, '0'); 
+      const mes = String(hoy.getMonth() + 1).padStart(2, '0');
       setFechaActual(`${dia}-${mes}-${hoy.getFullYear()}`);
     };
-    
+
     const cargarDatosIniciales = async () => {
       borrarCookiesFacturas();
       generarNumero();
@@ -358,8 +358,8 @@ function FacturaDetalle() {
         <div className="container-primer-buscador">
           <div className="segunda-informacion-nit">
             <div className="input">
-              <select 
-                className="custom-select" 
+              <select
+                className="custom-select"
                 value={selectedCliente}
                 onChange={handleClienteChange}
               >
@@ -415,8 +415,8 @@ function FacturaDetalle() {
         <div className="container-segundo-buscador">
           <div className="tercer-informacion-articulo">
             <div className="input">
-              <select 
-                className="custom-select" 
+              <select
+                className="custom-select"
                 value={selectedArticulo}
                 onChange={(e) => {
                   setSelectedArticulo(e.target.value);
@@ -449,9 +449,9 @@ function FacturaDetalle() {
           </div>
           <div className="tercer-informacion">
             <div className="input">
-              <select 
-                className="custom-select" 
-                value={naturaleza} 
+              <select
+                className="custom-select"
+                value={naturaleza}
                 onChange={(e) => setNaturaleza(e.target.value)}
               >
                 <option value="" disabled>Seleccione una opción</option>
@@ -471,31 +471,31 @@ function FacturaDetalle() {
           </div>
           <div className="tercer-informacion">
             <div className="input">
-              <input 
-                placeholder="Introducir cantidad" 
-                type="number" 
-                className="custom-input-texto" 
+              <input
+                placeholder="Introducir cantidad"
+                type="number"
+                className="custom-input-texto"
                 value={unidades}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 0) setUnidades(value);
+                  setUnidades(e.target.value);
                 }}
                 min="1"
                 max={dataArticulo?.[0]?.saldo}
               />
             </div>
             <div className="texto-input"><p>Unidades</p></div>
-            {dataArticulo?.[0] && <small style={{color: 'gray'}}>Disponible: {dataArticulo[0].saldo}</small>}
           </div>
           <div className="tercer-informacion">
             <div className="input">
               {naturaleza === 'Positiva (+)' ? (
-                <input 
-                  placeholder="Introducir costo" 
-                  type="number" 
-                  className="custom-input-texto" 
+                <input
+                  placeholder="Introducir costo"
+                  type="number"
+                  className="custom-input-texto"
                   value={costoUnidad}
-                  onChange={(e) => setCostoUnidad(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setCostoUnidad(e.target.value);
+                  }}
                   step="0.01"
                   min="0"
                 />
@@ -510,21 +510,19 @@ function FacturaDetalle() {
           {naturaleza === 'Negativa (-)' && (
             <div className="tercer-informacion">
               <div className="input">
-                <input 
-                  placeholder="Introducir precio" 
-                  type="number" 
+                <input
+                  placeholder="Introducir precio"
+                  type="number"
                   className="custom-input-texto"
                   value={precioVenta}
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (!isNaN(value)) setPrecioVenta(value);
+                    setPrecioVenta(e.target.value);
                   }}
                   step="0.01"
                   min={dataArticulo?.[0]?.costo_unidad || 0}
                 />
               </div>
               <div className="texto-input"><p>Precio de venta</p></div>
-              {dataArticulo?.[0] && <small style={{color: 'gray'}}>Mínimo: ${dataArticulo[0].costo_unidad.toFixed(2)}</small>}
             </div>
           )}
         </div>
@@ -533,50 +531,52 @@ function FacturaDetalle() {
             <span className="button_top">Agregar</span>
           </button>
         </div>
-        <div className="container-tabla-articulos">
-          <div className="tabla-articulos">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Laboratorio</th>
-                  <th>Naturaleza</th>
-                  <th>Unidades</th>
-                  <th>Precio Venta</th>
-                  <th>Precio Costo</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {articulosFactura.map((articulo, index) => (
-                  <tr key={index}>
-                    <td>{articulo.codigo_articulo}</td>
-                    <td>{articulo.nombre_articulo}</td>
-                    <td>{articulo.laboratorio}</td>
-                    <td>{articulo.naturaleza}</td>
-                    <td>{articulo.unidades}</td>
-                    <td>{articulo.precio_venta_unitario > 0 ? `$ ${articulo.precio_venta_unitario.toFixed(2)}` : '$ 0.00'}</td>
-                    <td>{articulo.costo_unitario > 0 ? `$ ${articulo.costo_unitario.toFixed(2)}` : '$ 0.00'}</td>
-                    <td><button onClick={() => eliminarArticulo(index)}>Eliminar</button></td>
+        {articulosFactura.length > 0 && (
+          <div className="container-tabla-articulos">
+            <div className="tabla-articulos">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Laboratorio</th>
+                    <th>Naturaleza</th>
+                    <th>Unidades</th>
+                    <th>Precio Venta</th>
+                    <th>Precio Costo</th>
+                    <th>Acción</th>
                   </tr>
-                ))}
-                <tr className="fila-total">
-                  <td colSpan={4}></td>
-                  <td>Total</td>
-                  <td>$ {articulosFactura.reduce((sum, art) => sum + art.precio_venta_unitario * art.unidades, 0).toFixed(2)}</td>
-                  <td>$ {articulosFactura.reduce((sum, art) => sum + art.costo_unitario * art.unidades, 0).toFixed(2)}</td>
-                  <td></td>
-                </tr>
-                {articulosFactura.some(art => art.naturaleza.includes('negativa')) && !validarDisponible() && (
-                  <tr className="error-message">
-                    <td colSpan={8}>El total de artículos con naturaleza negativa excede el disponible del cliente</td>
+                </thead>
+                <tbody>
+                  {articulosFactura.map((articulo, index) => (
+                    <tr key={index}>
+                      <td>{articulo.codigo_articulo}</td>
+                      <td>{articulo.nombre_articulo}</td>
+                      <td>{articulo.laboratorio}</td>
+                      <td>{articulo.naturaleza}</td>
+                      <td>{articulo.unidades}</td>
+                      <td>{articulo.precio_venta_unitario > 0 ? `$ ${articulo.precio_venta_unitario.toFixed(2)}` : '$ 0.00'}</td>
+                      <td>{articulo.costo_unitario > 0 ? `$ ${articulo.costo_unitario.toFixed(2)}` : '$ 0.00'}</td>
+                      <td><button onClick={() => eliminarArticulo(index)}>Eliminar</button></td>
+                    </tr>
+                  ))}
+                  <tr className="fila-total">
+                    <td colSpan={4}></td>
+                    <td>Total</td>
+                    <td>$ {articulosFactura.reduce((sum, art) => sum + art.precio_venta_unitario * art.unidades, 0).toFixed(2)}</td>
+                    <td>$ {articulosFactura.reduce((sum, art) => sum + art.costo_unitario * art.unidades, 0).toFixed(2)}</td>
+                    <td></td>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                  {articulosFactura.some(art => art.naturaleza.includes('negativa')) && !validarDisponible() && (
+                    <tr className="error-message">
+                      <td colSpan={8}>El total de artículos con naturaleza negativa excede el disponible del cliente</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="boton-guardar">
         <div className="btn-guardar">
@@ -584,95 +584,90 @@ function FacturaDetalle() {
             <span className="button_top">Guardar</span>
           </button>
         </div>
-        
-        {/* Sección de facturas del cliente */}
-        <div style={{ marginTop: '30px', width: '100%' }}>
-          <div className="container-boton" style={{ marginBottom: '20px' }}>
-            <button 
-              className="btn-agrgar" 
-              onClick={() => fetchFacturasCliente(selectedCliente)}
-              disabled={!selectedCliente}
-              style={{ opacity: !selectedCliente ? 0.5 : 1 }}
-            >
-              <span className="button_top">Ver Facturas</span>
-            </button>
-          </div>
-
-          {loading && <p style={{ textAlign: 'center', color: '#666' }}>Cargando facturas...</p>}
-          
-          {facturas.length > 0 ? (
-            <div className="container-tabla-articulos">
-              <div className="tabla-articulos">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Número</th>
-                      <th>Fecha Emisión</th>
-                      <th>Fecha Vencimiento</th>
-                      <th>Estado</th>
-                      <th>Total Venta</th>
-                      <th>Total Costo</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {facturas.map((factura) => (
-                      <tr key={factura._id}>
-                        <td>{factura.numero}</td>
-                        <td>{new Date(factura.fecha).toLocaleDateString('es-ES')}</td>
-                        <td>{new Date(factura.fecha_vencimiento).toLocaleDateString('es-ES')}</td>
-                        <td style={{ 
-                          color: factura.estado === 'pendiente' ? '#e20808' : '#17a01e',
-                          fontWeight: 'bold',
-                          textTransform: 'capitalize'
-                        }}>
-                          {factura.estado}
-                        </td>
-                        <td style={{ color: '#17a01e', fontWeight: 'bold' }}>
-                          ${factura.total_Venta.toLocaleString('es-ES')}
-                        </td>
-                        <td style={{ color: '#e20808', fontWeight: 'bold' }}>
-                          ${factura.total_Costo.toLocaleString('es-ES')}
-                        </td>
-                        <td>
-                          <button 
-                            onClick={() => handleVerFactura(factura.numero)}
-                            style={{
-                              background: 'linear-gradient(to bottom, #525252, #1f1f1f)',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              padding: '6px 12px',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease'
-                            }}
-                            onMouseOver={(e) => {
-                              e.target.style.background = 'linear-gradient(to bottom, #5a7cc8, #293a5a)';
-                              e.target.style.transform = 'translateY(-1px)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.background = 'linear-gradient(to bottom, #525252, #1f1f1f)';
-                              e.target.style.transform = 'none';
-                            }}
-                          >
-                            Ver Ahora
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <div style={{ marginTop: '30px', width: '100%' }}>
+            {/* Por esto: */}
+            <div className="botones-acciones">
+              <button
+                className="boton-accion"
+                onClick={() => navigate('/registrar-cliente')}
+                style={{ backgroundColor: '#f0f0f0' }}
+              >
+                <span className="button_top">Crear Cliente</span>
+              </button>
+              <button
+                className="boton-accion"
+                onClick={() => fetchFacturasCliente(selectedCliente)}
+                disabled={!selectedCliente}
+                style={{ opacity: !selectedCliente ? 0.5 : 1 }}
+              >
+                <span className="button_top">Ver Facturas</span>
+              </button>
             </div>
-          ) : (
-            !loading && selectedCliente && (
-              <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
-                No se encontraron facturas para este cliente
-              </p>
-            )
-          )}
-        </div>
+              <div className="contenedor-tabla-responsive">
+                {loading && <p style={{ textAlign: 'center', color: '#666' }}>Cargando facturas...</p>}
+
+                {facturas.length > 0 ? (
+                  <div className="contenedor-scroll-tabla">
+                    <table className="tabla-facturas">
+                      <thead>
+                        <tr>
+                          <th>Número</th>
+                          <th>Fecha Emisión</th>
+                          <th>Fecha Vencimiento</th>
+                          <th>Estado</th>
+                          <th>Total Venta</th>
+                          <th>Total Costo</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {facturas.map((factura) => (
+                          <tr key={factura._id}>
+                            <td>{factura.numero}</td>
+                            <td>{new Date(factura.fecha).toLocaleDateString('es-ES')}</td>
+                            <td>{new Date(factura.fecha_vencimiento).toLocaleDateString('es-ES')}</td>
+                            <td style={{
+                              color: factura.estado === 'pendiente' ? '#e20808' : '#17a01e',
+                              fontWeight: 'bold',
+                              textTransform: 'capitalize'
+                            }}>
+                              {factura.estado}
+                            </td>
+                            <td style={{ color: '#17a01e', fontWeight: 'bold' }}>
+                              ${factura.total_Venta.toLocaleString('es-ES')}
+                            </td>
+                            <td style={{ color: '#e20808', fontWeight: 'bold' }}>
+                              ${factura.total_Costo.toLocaleString('es-ES')}
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => handleVerFactura(factura.numero)}
+                              >
+                                Ver Ahora
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  !loading && selectedCliente && (
+                    <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>
+                      No se encontraron facturas para este cliente
+                    </p>
+                  )
+                )}
+              </div>
+          </div>
       </div>
+      {showError && (
+        <div className="error-message-container">
+          <div className="error-message-content">
+            {errorMessage}
+          </div>
+        </div>
+      )}
     </>
   );
 }
