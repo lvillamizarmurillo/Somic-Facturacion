@@ -1,6 +1,7 @@
 import "../../css/facturaDetalle.css";
 import React, { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
+import Navbar from "../Global.jsx";
 
 const env = {
   VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
@@ -15,7 +16,7 @@ function VerFactura() {
 
   const fetchData = async (url) => {
     try {
-      const response = await fetch(`https://${env.VITE_HOSTNAME}${url}`, {
+      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
@@ -55,6 +56,7 @@ function VerFactura() {
 
   return (
     <>
+      <Navbar />
       <div className="container">
         <div className="titulo-container">
           <h3>FACTURA SIMIC</h3>

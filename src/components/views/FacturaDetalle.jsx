@@ -2,6 +2,7 @@ import "../../css/facturaDetalle.css";
 import React, { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../Global.jsx";
 
 const env = {
   VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
@@ -32,7 +33,7 @@ function FacturaDetalle() {
 
   const fetchData = async (url) => {
     try {
-      const response = await fetch(`https://${env.VITE_HOSTNAME}${url}`, {
+      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
@@ -60,7 +61,7 @@ function FacturaDetalle() {
 
   const postFacturas = async (facturaData) => {
     try {
-      const response = await fetch(`https://${env.VITE_HOSTNAME}/facturas`, {
+      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/facturas`, {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(facturaData)
@@ -337,6 +338,7 @@ function FacturaDetalle() {
 
   return (
     <>
+      <Navbar />
       <div className="container">
         <div className="titulo-container">
           <h3>FACTURA SIMIC</h3>

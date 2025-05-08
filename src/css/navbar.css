@@ -1,0 +1,96 @@
+.navbar-container {
+    background-color: #9966ff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 4px 12px rgba(153, 102, 255, 0.3);
+    position: fixed; /* Cambiado de sticky a fixed */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    flex-wrap: wrap;
+    width: 100%; /* Asegura que ocupe todo el ancho */
+    box-sizing: border-box; /* Incluye padding en el ancho total */
+  }
+  
+  /* Añade margen al cuerpo para que el contenido no quede detrás del navbar */
+  body {
+    padding-top: 60px; /* Ajusta según la altura de tu navbar */
+  }
+  
+  .navbar-logo h3 {
+    color: white;
+    margin: 10px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-size: 1.5rem;
+  }
+  
+  .navbar-buttons {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  
+  .navbar-button {
+    background-color: #f3e8ff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    color: #553377;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(153, 102, 255, 0.2);
+    min-width: 120px;
+  }
+  
+  .navbar-button:hover {
+    background-color: #e6d7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(153, 102, 255, 0.3);
+  }
+  
+  .navbar-button.active {
+    background-color: #553377;
+    color: white;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Responsividad */
+  @media (max-width: 768px) {
+    .navbar-container {
+      flex-direction: column;
+      padding: 10px;
+    }
+    
+    .navbar-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .navbar-button {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      min-width: 100px;
+    }
+  
+    /* Ajusta el padding del body para móviles si el navbar cambia de altura */
+    body {
+      padding-top: 100px; /* Ajusta según la nueva altura del navbar en móviles */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .navbar-logo h3 {
+      font-size: 1.3rem;
+    }
+    
+    .navbar-button {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      min-width: 80px;
+    }
+  }
