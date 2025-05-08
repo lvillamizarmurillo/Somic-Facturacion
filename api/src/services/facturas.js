@@ -30,6 +30,7 @@ export default class Facturas {
                 }
             ]).toArray();
             res.locals.result = result;
+            
             next();
         } catch (error) {
             next(error)

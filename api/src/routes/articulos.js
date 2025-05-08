@@ -8,6 +8,8 @@ routerArticulos.get('/', Articulos.getCodigoArticulo, validationGet())
 
 routerArticulos.get('/:codigo', Articulos.getArticulo, validationGet())
 
+routerArticulos.post('/', Articulos.postArticulo)
+
 export {
     routerArticulos
 }

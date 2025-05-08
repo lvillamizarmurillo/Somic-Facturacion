@@ -10,6 +10,10 @@ routerFacturas.get('/:id', Facturas.getFacturasNit, validationGet())
 
 routerFacturas.get('/completa/:factura', Facturas.getFacturaCompleta)
 
+routerFacturas.get('/factura-kardex/kardex', Facturas.getFacturasKardex, validationGet())
+
+routerFacturas.get('/completa/:factura', Facturas.getFacturaCompleta)
+
 routerFacturas.post('/', Facturas.postFactura)
 
 export {
