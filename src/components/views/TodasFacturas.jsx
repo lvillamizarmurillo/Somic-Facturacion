@@ -4,8 +4,7 @@ import "../../css/todasFacturas.css";
 import Navbar from "../Global.jsx";
 
 const env = {
-  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
-  PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
+  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME
 };
 
 function TodasFacturas() {
@@ -18,7 +17,7 @@ function TodasFacturas() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/facturas`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}/facturas`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
@@ -41,7 +40,6 @@ function TodasFacturas() {
     navigate(`/factura/${numeroFactura}`);
   };
 
-  // Calcular totales
   const calcularTotales = () => {
     const totalVentas = facturas.reduce((sum, factura) => sum + factura.total_Venta, 0);
     const totalCompras = facturas.reduce((sum, factura) => sum + factura.total_Costo, 0);
@@ -133,7 +131,6 @@ function TodasFacturas() {
               </div>
             </div>
 
-            {/* Tabla de resumen */}
             <div className="resumen-container">
               <table className="tabla-resumen">
                 <thead>

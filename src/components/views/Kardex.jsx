@@ -4,8 +4,7 @@ import "../../css/kardex.css";
 import Navbar from "../Global.jsx";
 
 const env = {
-  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
-  PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
+  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME
 };
 
 function KardexFacturas() {
@@ -18,7 +17,7 @@ function KardexFacturas() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/facturas/factura-kardex/kardex`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}/facturas/factura-kardex/kardex`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
@@ -41,7 +40,6 @@ function KardexFacturas() {
     navigate(`/factura/${numeroFactura}`);
   };
 
-  // Calcular totales
   const calcularTotales = () => {
     const totalVentas = movimientos.reduce((sum, mov) => sum + mov.subtotal_venta, 0);
     const totalCompras = movimientos.reduce((sum, mov) => sum + mov.subtotal_costo, 0);
@@ -144,7 +142,6 @@ function KardexFacturas() {
               </div>
             </div>
 
-            {/* Tabla de resumen */}
             <div className="resumen-container">
               <table className="tabla-resumen">
                 <thead>

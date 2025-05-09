@@ -4,20 +4,17 @@ import "../../css/registrarCliente.css";
 import Navbar from "../Global.jsx";
 
 const env = {
-  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
-  PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
+  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME
 };
 
 function RegistrarCliente() {
   const navigate = useNavigate();
-  const [formType, setFormType] = useState('cliente'); // 'cliente' o 'articulo'
+  const [formType, setFormType] = useState('cliente');
   const [formData, setFormData] = useState({
-    // Datos para cliente
     documento: '',
     nombre: '',
     cupo: '',
     plazo_dias: '',
-    // Datos para artículo
     codigo: '',
     nombre_articulo: '',
     laboratorio: '',
@@ -36,7 +33,7 @@ function RegistrarCliente() {
 
   const postCliente = async (clienteData) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/cliente`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}`, {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(clienteData)
@@ -50,7 +47,7 @@ function RegistrarCliente() {
 
   const postArticulo = async (articuloData) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}/articulos`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}/articulos`, {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -163,7 +160,6 @@ function RegistrarCliente() {
             <div className="form-fields-group">
               {formType === 'cliente' ? (
                 <>
-                  {/* Documento */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -181,7 +177,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Nombre */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -199,7 +194,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Cupo */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -219,7 +213,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Plazo en días */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -240,7 +233,6 @@ function RegistrarCliente() {
                 </>
               ) : (
                 <>
-                  {/* Código */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -258,7 +250,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Nombre */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -276,7 +267,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Laboratorio */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -294,7 +284,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Saldo */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -313,7 +302,6 @@ function RegistrarCliente() {
                     </div>
                   </div>
                   
-                  {/* Costo unitario */}
                   <div className="form-field">
                     <div className="field-input">
                       <input
@@ -336,7 +324,6 @@ function RegistrarCliente() {
               )}
             </div>
             
-            {/* Botones */}
             <div className="form-actions">
               <button 
                 type="button" 

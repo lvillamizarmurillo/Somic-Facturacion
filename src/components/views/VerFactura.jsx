@@ -4,8 +4,7 @@ import { useParams } from 'react-router-dom';
 import Navbar from "../Global.jsx";
 
 const env = {
-  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME,
-  PORT_BACKEND: import.meta.env.VITE_PORT_BACKEND
+  VITE_HOSTNAME: import.meta.env.VITE_HOSTNAME
 };
 
 function VerFactura() {
@@ -16,7 +15,7 @@ function VerFactura() {
 
   const fetchData = async (url) => {
     try {
-      const response = await fetch(`http://${env.VITE_HOSTNAME}:${env.PORT_BACKEND}${url}`, {
+      const response = await fetch(`https://${env.VITE_HOSTNAME}${url}`, {
         method: "GET",
         headers: {'Content-Type': 'application/json'}
       });
