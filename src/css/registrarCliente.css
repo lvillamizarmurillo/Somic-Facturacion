@@ -240,3 +240,65 @@ button:disabled .button-content {
       width: 100%;
   }
 }
+
+.form-type-selector {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e0d1ff;
+}
+
+.form-type-button {
+  background-color: #f3e8ff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  color: #553377;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(153, 102, 255, 0.2);
+}
+
+.form-type-button:hover {
+  background-color: #e6d7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(153, 102, 255, 0.3);
+}
+
+.form-type-button.active {
+  background-color: #553377;
+  color: white;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajustes para el formulario de artículo */
+.form-field input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-field input[type="number"]::-webkit-outer-spin-button,
+.form-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .form-type-selector {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .form-type-button {
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-type-button {
+    width: 100%;
+    padding: 8px 15px;
+  }
+}
